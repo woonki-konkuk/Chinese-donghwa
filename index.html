@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#036b3f">
+<title>중국어 단어 퀴즈</title>
+<style>
+  :root{
+    --bg:#f1f6f2;
+    --card:#ffffff;
+    --ink:#16241c;
+    --muted:#6c7a72;
+    --line:#dde9e1;
+    --brand:#036b3f;        /* 건국대 헤리티지 그린 */
+    --brand-dark:#024a2b;
+    --brand-soft:#e3f1e9;
+    --green:#036b3f;        /* 정답 = 건국 그린 */
+    --green-soft:#e3f1e9;
+    --red:#c6463f;          /* 오답 */
+    --red-soft:#f8e7e6;
+    --gold:#c79a3a;
+    --shadow:0 6px 24px rgba(3,74,43,.12);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    min-height:100dvh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:480px;
+    margin:0 auto;
+    padding:20px 18px calc(28px + env(safe-area-inset-bottom));
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+  }
+  .hidden{display:none !important;}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:18px;
+  }
+  .logo{font-size:19px;font-weight:800;letter-spacing:-.3px;display:flex;align-items:center;gap:7px;}
+  .logo .dot{width:10px;height:10px;border-radius:50%;background:var(--brand);display:inline-block;}
+  .home-btn{
+    border:none;background:var(--brand-soft);color:var(--brand-dark);
+    font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer;
+  }
+
+  /* ---------- START SCREEN ---------- */
+  .hero{
+    background:var(--card);border-radius:24px;padding:26px 22px;
+    box-shadow:var(--shadow);text-align:center;margin-bottom:18px;
+  }
+  .hero h1{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-.5px;}
+  .hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.5;}
+  .hero .count-pill{
+    display:inline-block;margin-top:14px;background:var(--brand-soft);color:var(--brand-dark);
+    font-weight:800;font-size:13px;padding:7px 16px;border-radius:999px;
+  }
+
+  .section{margin-bottom:20px;}
+  .section-label{font-size:13px;font-weight:800;color:var(--muted);margin:0 0 10px 2px;letter-spacing:.2px;}
+  .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt-grid.three{grid-template-columns:1fr 1fr 1fr;}
+  .opt{
+    border:2px solid var(--line);background:var(--card);border-radius:16px;
+    padding:14px 10px;cursor:pointer;text-align:center;transition:.15s;
+    font-weight:700;font-size:15px;color:var(--ink);
+  }
+  .opt small{display:block;font-weight:600;font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .opt.active{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-dark);}
+  .opt.active small{color:var(--brand-dark);}
+
+  .start-btn{
+    margin-top:6px;width:100%;border:none;cursor:pointer;
+    background:var(--brand);color:#fff;font-size:18px;font-weight:800;
+    padding:18px;border-radius:18px;box-shadow:0 8px 20px rgba(3,107,63,.32);
+    transition:.15s;
+  }
+  .start-btn:active{transform:scale(.98);}
+
+  /* ---------- QUIZ SCREEN ---------- */
+  .quiz-head{margin-bottom:16px;}
+  .bar-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+  .bar-row .score{color:var(--brand-dark);}
+  .progress{height:9px;background:var(--line);border-radius:999px;overflow:hidden;}
+  .progress > i{display:block;height:100%;background:var(--brand);border-radius:999px;transition:width .3s ease;}
+
+  .q-card{
+    background:var(--card);border-radius:24px;box-shadow:var(--shadow);
+    padding:32px 22px;text-align:center;margin:18px 0 16px;
+  }
+  .q-tag{font-size:12px;font-weight:800;color:var(--brand);letter-spacing:.5px;text-transform:uppercase;}
+  .q-prompt{font-size:46px;font-weight:800;letter-spacing:-1px;margin:14px 0 8px;line-height:1.15;word-break:keep-all;}
+  .q-prompt.small{font-size:34px;}
+  .q-sub{font-size:15px;color:var(--muted);font-weight:600;min-height:20px;}
+
+  .answers{display:flex;flex-direction:column;gap:11px;}
+  .ans{
+    border:2px solid var(--line);background:var(--card);border-radius:16px;
+    padding:17px 18px;font-size:18px;font-weight:700;cursor:pointer;text-align:left;
+    display:flex;align-items:center;gap:12px;transition:.12s;color:var(--ink);width:100%;
+  }
+  .ans .idx{
+    flex:0 0 26px;width:26px;height:26px;border-radius:8px;background:var(--brand-soft);
+    color:var(--brand-dark);font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  }
+  .ans .txt{flex:1;}
+  .ans .mark{font-size:20px;font-weight:800;}
+  .ans:active{transform:scale(.99);}
+  .ans.correct{border-color:var(--green);background:var(--green-soft);color:#024a2b;}
+  .ans.correct .idx{background:var(--green);color:#fff;}
+  .ans.correct .mark{color:var(--green);}
+  .ans.wrong{border-color:var(--red);background:var(--red-soft);color:#b1322d;}
+  .ans.wrong .idx{background:var(--red);color:#fff;}
+  .ans.wrong .mark{color:var(--red);}
+  .ans.disabled{cursor:default;opacity:.55;}
+  .ans.disabled.correct,.ans.disabled.wrong{opacity:1;}
+
+  .next-btn{
+    margin-top:16px;width:100%;border:none;cursor:pointer;
+    background:var(--ink);color:#fff;font-size:17px;font-weight:800;
+    padding:16px;border-radius:16px;transition:.15s;
+  }
+  .next-btn:active{transform:scale(.98);}
+
+  /* ---------- RESULT SCREEN ---------- */
+  .result-card{
+    background:var(--card);border-radius:24px;box-shadow:var(--shadow);
+    padding:30px 22px;text-align:center;margin-bottom:16px;
+  }
+  .result-emoji{font-size:54px;line-height:1;margin-bottom:6px;}
+  .result-card h2{margin:0 0 4px;font-size:22px;font-weight:800;}
+  .result-msg{color:var(--muted);font-size:14px;margin:0 0 18px;}
+  .score-ring{
+    font-size:44px;font-weight:800;color:var(--brand);
+  }
+  .score-ring small{font-size:20px;color:var(--muted);font-weight:700;}
+  .stat-row{display:flex;gap:10px;margin-top:18px;}
+  .stat{flex:1;background:var(--bg);border-radius:14px;padding:12px;}
+  .stat .n{font-size:22px;font-weight:800;}
+  .stat .l{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px;}
+  .stat.ok .n{color:var(--green);}
+  .stat.no .n{color:var(--red);}
+
+  .review-label{font-size:14px;font-weight:800;margin:6px 2px 10px;}
+  .review-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .rev{
+    background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--red);
+    border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;
+  }
+  .rev .h{font-size:24px;font-weight:800;flex:0 0 auto;}
+  .rev .meta{flex:1;min-width:0;}
+  .rev .py{font-size:12.5px;color:var(--brand-dark);font-weight:700;}
+  .rev .ko{font-size:15px;font-weight:700;margin-top:1px;}
+
+  .btn-row{display:flex;gap:10px;}
+  .btn-row button{
+    flex:1;border:none;cursor:pointer;font-size:16px;font-weight:800;
+    padding:16px;border-radius:16px;transition:.15s;
+  }
+  .btn-row .retry{background:var(--brand);color:#fff;box-shadow:0 6px 16px rgba(3,107,63,.28);}
+  .btn-row .again{background:var(--card);color:var(--ink);border:2px solid var(--line);}
+  .btn-row button:active{transform:scale(.98);}
+
+  .footer-note{text-align:center;font-size:12px;color:var(--muted);margin-top:auto;padding-top:20px;}
+
+  @media (max-width:360px){
+    .q-prompt{font-size:40px;}
+    .ans{font-size:16px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="logo"><span class="dot"></span>중국어 단어 퀴즈</div>
+    <button class="home-btn hidden" id="homeBtn">처음으로</button>
+  </div>
+
+  <!-- ===== START ===== -->
+  <div id="startScreen">
+    <div class="hero">
+      <h1>오늘도 화이팅! 🐼</h1>
+      <p>랜덤으로 문제가 나와요.<br>설정을 고르고 시작을 눌러요.</p>
+      <span class="count-pill">전체 75개 단어</span>
+    </div>
+
+    <div class="section">
+      <p class="section-label">📚 범위</p>
+      <div class="opt-grid three" id="catOpts">
+        <button class="opt active" data-cat="all">전체<small>75개</small></button>
+        <button class="opt" data-cat="동물">동물<small>38개</small></button>
+        <button class="opt" data-cat="채소·과일">채소·과일<small>37개</small></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">🎯 문제 방식</p>
+      <div class="opt-grid" id="modeOpts">
+        <button class="opt active" data-mode="h2k">한자 보고<small>뜻 맞히기</small></button>
+        <button class="opt" data-mode="k2h">뜻 보고<small>한자 맞히기</small></button>
+        <button class="opt" data-mode="p2k">병음 보고<small>뜻 맞히기</small></button>
+        <button class="opt" data-mode="mix">섞어서<small>랜덤 출제</small></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">🔢 문제 수</p>
+      <div class="opt-grid three" id="countOpts">
+        <button class="opt" data-count="10">10문제</button>
+        <button class="opt active" data-count="20">20문제</button>
+        <button class="opt" data-count="all">전체</button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn">시작하기 →</button>
+  </div>
+
+  <!-- ===== QUIZ ===== -->
+  <div id="quizScreen" class="hidden">
+    <div class="quiz-head">
+      <div class="bar-row">
+        <span id="qCounter">1 / 20</span>
+        <span class="score">맞은 개수 <span id="qScore">0</span></span>
+      </div>
+      <div class="progress"><i id="qBar" style="width:0%"></i></div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-tag" id="qTag">뜻을 고르세요</div>
+      <div class="q-prompt" id="qPrompt">猫</div>
+      <div class="q-sub" id="qSub">māo</div>
+    </div>
+
+    <div class="answers" id="answers"></div>
+
+    <button class="next-btn hidden" id="nextBtn">다음 문제 →</button>
+  </div>
+
+  <!-- ===== RESULT ===== -->
+  <div id="resultScreen" class="hidden">
+    <div class="result-card">
+      <div class="result-emoji" id="rEmoji">🎉</div>
+      <h2 id="rTitle">잘했어요!</h2>
+      <p class="result-msg" id="rMsg">계속 이렇게만 하면 다 외울 수 있어요.</p>
+      <div class="score-ring"><span id="rScore">18</span><small> / <span id="rTotal">20</span></small></div>
+      <div class="stat-row">
+        <div class="stat ok"><div class="n" id="rOk">18</div><div class="l">맞음</div></div>
+        <div class="stat no"><div class="n" id="rNo">2</div><div class="l">틀림</div></div>
+        <div class="stat"><div class="n" id="rPct">90%</div><div class="l">정답률</div></div>
+      </div>
+    </div>
+
+    <div id="reviewBox">
+      <p class="review-label">📝 틀린 단어 다시 보기</p>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="again" id="againBtn">설정 바꾸기</button>
+      <button class="retry" id="retryBtn">다시 풀기 🔁</button>
+    </div>
+  </div>
+
+  <div class="footer-note">엄마가 만들어준 단어장 💛</div>
+</div>
+
+<script>
+const WORDS = [
+  {num:1,hanzi:"猫",pinyin:"māo",korean:"고양이",cat:"동물"},
+  {num:2,hanzi:"猪",pinyin:"zhū",korean:"돼지",cat:"동물"},
+  {num:3,hanzi:"啄木鸟",pinyin:"zhuómùniǎo",korean:"딱따구리",cat:"동물"},
+  {num:4,hanzi:"豹子",pinyin:"bàozi",korean:"표범",cat:"동물"},
+  {num:5,hanzi:"鸭子",pinyin:"yāzi",korean:"오리",cat:"동물"},
+  {num:6,hanzi:"狗",pinyin:"gǒu",korean:"개",cat:"동물"},
+  {num:7,hanzi:"骆驼",pinyin:"luòtuó",korean:"낙타",cat:"동물"},
+  {num:8,hanzi:"大雁",pinyin:"dàyàn",korean:"기러기",cat:"동물"},
+  {num:9,hanzi:"鹦鹉",pinyin:"yīngwǔ",korean:"앵무새",cat:"동물"},
+  {num:10,hanzi:"羔羊",pinyin:"gāoyáng",korean:"(새끼)양",cat:"동물"},
+  {num:11,hanzi:"猴子",pinyin:"hóuzi",korean:"원숭이",cat:"동물"},
+  {num:12,hanzi:"斑马",pinyin:"bānmǎ",korean:"얼룩말",cat:"동물"},
+  {num:13,hanzi:"刺猬",pinyin:"cìwei",korean:"고슴도치",cat:"동물"},
+  {num:14,hanzi:"兔子",pinyin:"tùzi",korean:"토끼",cat:"동물"},
+  {num:15,hanzi:"孔雀",pinyin:"kǒngquè",korean:"공작새",cat:"동물"},
+  {num:16,hanzi:"企鹅",pinyin:"qǐé",korean:"펭귄",cat:"동물"},
+  {num:17,hanzi:"蜻蜓",pinyin:"qīngtíng",korean:"잠자리",cat:"동물"},
+  {num:18,hanzi:"蝉",pinyin:"chán",korean:"매미",cat:"동물"},
+  {num:19,hanzi:"袋鼠",pinyin:"dàishǔ",korean:"캥거루",cat:"동물"},
+  {num:20,hanzi:"蜗牛",pinyin:"wōniú",korean:"달팽이",cat:"동물"},
+  {num:21,hanzi:"狼",pinyin:"láng",korean:"늑대",cat:"동물"},
+  {num:22,hanzi:"蜜蜂",pinyin:"mìfēng",korean:"꿀벌",cat:"동물"},
+  {num:23,hanzi:"熊猫",pinyin:"xióngmāo",korean:"판다",cat:"동물"},
+  {num:24,hanzi:"蝴蝶",pinyin:"húdié",korean:"나비",cat:"동물"},
+  {num:25,hanzi:"麻雀",pinyin:"máquè",korean:"참새",cat:"동물"},
+  {num:26,hanzi:"长颈鹿",pinyin:"chángjǐnglù",korean:"기린",cat:"동물"},
+  {num:27,hanzi:"狮子",pinyin:"shīzi",korean:"사자",cat:"동물"},
+  {num:28,hanzi:"螳螂",pinyin:"tángláng",korean:"사마귀",cat:"동물"},
+  {num:29,hanzi:"公鸡",pinyin:"gōngjī",korean:"수탉",cat:"동물"},
+  {num:30,hanzi:"猫头鹰",pinyin:"māotóuyīng",korean:"부엉이·올빼미",cat:"동물"},
+  {num:31,hanzi:"大象",pinyin:"dàxiàng",korean:"코끼리",cat:"동물"},
+  {num:32,hanzi:"北极熊",pinyin:"běijíxióng",korean:"북극곰",cat:"동물"},
+  {num:33,hanzi:"母鸡",pinyin:"mǔjī",korean:"암탉",cat:"동물"},
+  {num:34,hanzi:"鳄鱼",pinyin:"èyú",korean:"악어",cat:"동물"},
+  {num:35,hanzi:"天鹅",pinyin:"tiāné",korean:"백조",cat:"동물"},
+  {num:36,hanzi:"金鱼",pinyin:"jīnyú",korean:"금붕어",cat:"동물"},
+  {num:37,hanzi:"河马",pinyin:"hémǎ",korean:"하마",cat:"동물"},
+  {num:38,hanzi:"奶牛",pinyin:"nǎiniú",korean:"젖소",cat:"동물"},
+  {num:39,hanzi:"香蕉",pinyin:"xiāngjiāo",korean:"바나나",cat:"채소·과일"},
+  {num:40,hanzi:"橘子",pinyin:"júzi",korean:"귤",cat:"채소·과일"},
+  {num:41,hanzi:"毛豆",pinyin:"máodòu",korean:"콩",cat:"채소·과일"},
+  {num:42,hanzi:"萝卜",pinyin:"luóbo",korean:"무",cat:"채소·과일"},
+  {num:43,hanzi:"草莓",pinyin:"cǎoméi",korean:"딸기",cat:"채소·과일"},
+  {num:44,hanzi:"南瓜",pinyin:"nánguā",korean:"호박",cat:"채소·과일"},
+  {num:45,hanzi:"洋葱",pinyin:"yángcōng",korean:"양파",cat:"채소·과일"},
+  {num:46,hanzi:"白菜",pinyin:"báicài",korean:"배추",cat:"채소·과일"},
+  {num:47,hanzi:"芹菜",pinyin:"qíncài",korean:"샐러리",cat:"채소·과일"},
+  {num:48,hanzi:"土豆",pinyin:"tǔdòu",korean:"감자",cat:"채소·과일"},
+  {num:49,hanzi:"大蒜",pinyin:"dàsuàn",korean:"마늘",cat:"채소·과일"},
+  {num:50,hanzi:"西红柿",pinyin:"xīhóngshì",korean:"토마토",cat:"채소·과일"},
+  {num:51,hanzi:"辣椒",pinyin:"làjiāo",korean:"고추",cat:"채소·과일"},
+  {num:52,hanzi:"荔枝",pinyin:"lìzhī",korean:"리치",cat:"채소·과일"},
+  {num:53,hanzi:"核桃",pinyin:"hétáo",korean:"호두",cat:"채소·과일"},
+  {num:54,hanzi:"葡萄",pinyin:"pútáo",korean:"포도",cat:"채소·과일"},
+  {num:55,hanzi:"蘑菇",pinyin:"mógū",korean:"버섯",cat:"채소·과일"},
+  {num:56,hanzi:"卷心菜",pinyin:"juǎnxīncài",korean:"양배추",cat:"채소·과일"},
+  {num:57,hanzi:"樱桃",pinyin:"yīngtáo",korean:"체리",cat:"채소·과일"},
+  {num:58,hanzi:"甜椒",pinyin:"tiánjiāo",korean:"파프리카",cat:"채소·과일"},
+  {num:59,hanzi:"茄子",pinyin:"qiézi",korean:"가지",cat:"채소·과일"},
+  {num:60,hanzi:"杨桃",pinyin:"yángtáo",korean:"스타프루트",cat:"채소·과일"},
+  {num:61,hanzi:"柿子",pinyin:"shìzi",korean:"감",cat:"채소·과일"},
+  {num:62,hanzi:"苦瓜",pinyin:"kǔguā",korean:"여주",cat:"채소·과일"},
+  {num:63,hanzi:"椰子",pinyin:"yēzi",korean:"코코넛",cat:"채소·과일"},
+  {num:64,hanzi:"芋头",pinyin:"yùtou",korean:"타로",cat:"채소·과일"},
+  {num:65,hanzi:"猕猴桃",pinyin:"míhóutáo",korean:"키위",cat:"채소·과일"},
+  {num:66,hanzi:"西瓜",pinyin:"xīguā",korean:"수박",cat:"채소·과일"},
+  {num:67,hanzi:"菠萝",pinyin:"bōluó",korean:"파인애플",cat:"채소·과일"},
+  {num:68,hanzi:"油菜",pinyin:"yóucài",korean:"청경채",cat:"채소·과일"},
+  {num:69,hanzi:"芦笋",pinyin:"lúsǔn",korean:"아스파라거스",cat:"채소·과일"},
+  {num:70,hanzi:"竹笋",pinyin:"zhúsǔn",korean:"죽순",cat:"채소·과일"},
+  {num:71,hanzi:"西葫芦",pinyin:"xīhúlú",korean:"애호박",cat:"채소·과일"},
+  {num:72,hanzi:"胡萝卜",pinyin:"húluóbo",korean:"당근",cat:"채소·과일"},
+  {num:73,hanzi:"苹果",pinyin:"píngguǒ",korean:"사과",cat:"채소·과일"},
+  {num:74,hanzi:"桃子",pinyin:"táozi",korean:"복숭아",cat:"채소·과일"},
+  {num:75,hanzi:"梨",pinyin:"lí",korean:"배",cat:"채소·과일"}
+];
+
+// ---------- 설정 상태 ----------
+const settings = { cat:"all", mode:"h2k", count:"20" };
+
+// ---------- 화면 요소 ----------
+const startScreen = document.getElementById('startScreen');
+const quizScreen  = document.getElementById('quizScreen');
+const resultScreen= document.getElementById('resultScreen');
+const homeBtn     = document.getElementById('homeBtn');
+
+// ---------- 옵션 버튼 ----------
+function bindOpts(containerId, key){
+  document.querySelectorAll('#'+containerId+' .opt').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#'+containerId+' .opt').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      settings[key] = btn.dataset[key];
+    });
+  });
+}
+bindOpts('catOpts','cat');
+bindOpts('modeOpts','mode');
+bindOpts('countOpts','count');
+
+// ---------- 유틸 ----------
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ---------- 퀴즈 상태 ----------
+let quiz = { list:[], idx:0, score:0, wrong:[], answered:false };
+
+function startQuiz(){
+  // 범위 적용
+  let pool = settings.cat==="all" ? WORDS : WORDS.filter(w=>w.cat===settings.cat);
+  pool = shuffle(pool);
+  // 문제 수 적용
+  let n = settings.count==="all" ? pool.length : Math.min(parseInt(settings.count), pool.length);
+  quiz.list = pool.slice(0, n);
+  quiz.idx = 0;
+  quiz.score = 0;
+  quiz.wrong = [];
+
+  startScreen.classList.add('hidden');
+  resultScreen.classList.add('hidden');
+  quizScreen.classList.remove('hidden');
+  homeBtn.classList.remove('hidden');
+  renderQuestion();
+}
+
+// 문제 하나의 출제 방식 결정
+function pickMode(){
+  if(settings.mode==="mix"){
+    const m = ["h2k","k2h","p2k"];
+    return m[Math.floor(Math.random()*m.length)];
+  }
+  return settings.mode;
+}
+
+function renderQuestion(){
+  quiz.answered = false;
+  const w = quiz.list[quiz.idx];
+  const mode = pickMode();
+  w._mode = mode; // 채점용 저장
+
+  // 진행 표시
+  document.getElementById('qCounter').textContent = (quiz.idx+1)+' / '+quiz.list.length;
+  document.getElementById('qScore').textContent = quiz.score;
+  document.getElementById('qBar').style.width = Math.round((quiz.idx/quiz.list.length)*100)+'%';
+
+  const tagEl    = document.getElementById('qTag');
+  const promptEl = document.getElementById('qPrompt');
+  const subEl    = document.getElementById('qSub');
+  const ansBox   = document.getElementById('answers');
+  ansBox.innerHTML = '';
+  document.getElementById('nextBtn').classList.add('hidden');
+
+  // 보기 후보 (같은 범주에서 우선 뽑기)
+  let answerField, distractorPool;
+  if(mode==="k2h"){
+    // 뜻 보여주고 한자 고르기
+    tagEl.textContent = "알맞은 한자를 고르세요";
+    promptEl.textContent = w.korean;
+    promptEl.classList.add('small');
+    subEl.textContent = "";
+    answerField = "hanzi";
+  } else {
+    // h2k 또는 p2k : 뜻 고르기
+    tagEl.textContent = "알맞은 뜻을 고르세요";
+    promptEl.classList.remove('small');
+    if(mode==="h2k"){
+      promptEl.textContent = w.hanzi;
+      subEl.textContent = "";          // 한자만 (병음 힌트 없음)
+    } else { // p2k
+      promptEl.textContent = w.pinyin;
+      promptEl.classList.add('small');
+      subEl.textContent = "";
+    }
+    answerField = "korean";
+  }
+
+  // 정답 + 오답 3개 (같은 cat 우선, 부족하면 전체에서)
+  const sameCat = WORDS.filter(x=>x.cat===w.cat && x.num!==w.num && x[answerField]!==w[answerField]);
+  const others  = WORDS.filter(x=>x.cat!==w.cat && x[answerField]!==w[answerField]);
+  let distract = shuffle(sameCat).slice(0,3);
+  if(distract.length<3){
+    distract = distract.concat(shuffle(others).slice(0, 3-distract.length));
+  }
+  let choices = shuffle([w, ...distract]);
+
+  const idxLabels = ['A','B','C','D'];
+  choices.forEach((c, i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'ans';
+    btn.innerHTML = '<span class="idx">'+idxLabels[i]+'</span>'
+                  + '<span class="txt">'+c[answerField]+'</span>'
+                  + '<span class="mark"></span>';
+    btn.addEventListener('click', ()=>handleAnswer(btn, c, w, answerField));
+    ansBox.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, choice, w, field){
+  if(quiz.answered) return;
+  quiz.answered = true;
+
+  const correct = choice[field] === w[field];
+  const allBtns = document.querySelectorAll('#answers .ans');
+
+  allBtns.forEach(b=>{
+    b.classList.add('disabled');
+    const txt = b.querySelector('.txt').textContent;
+    if(txt === w[field]){
+      b.classList.add('correct');
+      b.querySelector('.mark').textContent = '✓';
+    }
+  });
+
+  if(correct){
+    quiz.score++;
+    document.getElementById('qScore').textContent = quiz.score;
+  } else {
+    btn.classList.add('wrong');
+    btn.querySelector('.mark').textContent = '✕';
+    quiz.wrong.push(w);
+  }
+
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = (quiz.idx+1 < quiz.list.length) ? '다음 문제 →' : '결과 보기 🏁';
+  nextBtn.classList.remove('hidden');
+}
+
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  quiz.idx++;
+  if(quiz.idx < quiz.list.length){
+    renderQuestion();
+    window.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    showResult();
+  }
+});
+
+function showResult(){
+  quizScreen.classList.add('hidden');
+  resultScreen.classList.remove('hidden');
+  homeBtn.classList.remove('hidden');
+
+  const total = quiz.list.length;
+  const ok = quiz.score;
+  const no = total - ok;
+  const pct = Math.round((ok/total)*100);
+
+  document.getElementById('rScore').textContent = ok;
+  document.getElementById('rTotal').textContent = total;
+  document.getElementById('rOk').textContent = ok;
+  document.getElementById('rNo').textContent = no;
+  document.getElementById('rPct').textContent = pct+'%';
+
+  let emoji, title, msg;
+  if(pct===100){ emoji='🏆'; title='완벽해요! 만점!'; msg='우와, 다 맞혔어요. 진짜 대단해요!'; }
+  else if(pct>=80){ emoji='🎉'; title='아주 잘했어요!'; msg='조금만 더 하면 완벽! 틀린 것만 다시 봐요.'; }
+  else if(pct>=60){ emoji='💪'; title='좋아요, 잘하고 있어요!'; msg='틀린 단어 다시 보고 한 번 더 도전해요.'; }
+  else { emoji='🌱'; title='괜찮아요, 시작이 반!'; msg='반복하면 금방 외워져요. 다시 풀어볼까요?'; }
+  document.getElementById('rEmoji').textContent = emoji;
+  document.getElementById('rTitle').textContent = title;
+  document.getElementById('rMsg').textContent = msg;
+
+  // 틀린 단어 복습
+  const box = document.getElementById('reviewBox');
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  if(quiz.wrong.length===0){
+    box.classList.add('hidden');
+  } else {
+    box.classList.remove('hidden');
+    // 중복 제거
+    const seen = new Set();
+    quiz.wrong.filter(w=>{ if(seen.has(w.num))return false; seen.add(w.num); return true; })
+      .forEach(w=>{
+        const el = document.createElement('div');
+        el.className = 'rev';
+        el.innerHTML = '<div class="h">'+w.hanzi+'</div>'
+                     + '<div class="meta"><div class="py">'+w.pinyin+'</div>'
+                     + '<div class="ko">'+w.korean+'</div></div>';
+        list.appendChild(el);
+      });
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ---------- 버튼 연결 ----------
+document.getElementById('startBtn').addEventListener('click', startQuiz);
+document.getElementById('retryBtn').addEventListener('click', startQuiz);
+document.getElementById('againBtn').addEventListener('click', goHome);
+homeBtn.addEventListener('click', goHome);
+
+function goHome(){
+  quizScreen.classList.add('hidden');
+  resultScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+  homeBtn.classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
