@@ -79,6 +79,7 @@
   .opt small{display:block;font-weight:600;font-size:10.5px;color:var(--muted);margin-top:2px;}
   .opt.active{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-dark);}
   .opt.active small{color:var(--brand-dark);}
+  .opt.wide{grid-column:1 / -1;}
 
   .start-btn{
     margin-top:3px;width:100%;border:none;cursor:pointer;
@@ -170,6 +171,7 @@
   }
   .btn-row .retry{background:var(--brand);color:#fff;box-shadow:0 6px 16px rgba(3,107,63,.28);}
   .btn-row .again{background:var(--card);color:var(--ink);border:2px solid var(--line);}
+  .btn-row .wrongonly{background:var(--red);color:#fff;box-shadow:0 6px 16px rgba(198,70,63,.28);}
   .btn-row button:active{transform:scale(.98);}
 
   .footer-note{text-align:center;font-size:11px;color:var(--muted);margin-top:auto;padding-top:10px;}
@@ -198,16 +200,29 @@
   <div id="startScreen">
     <div class="hero">
       <h1>오늘도 화이팅! 🐼</h1>
-      <p>설정을 고르고 시작을 눌러요. 문제는 랜덤이에요.</p>
-      <span class="count-pill">전체 75개 단어</span>
+      <p>설정을 고르고 시작을 눌러요. 문제와 보기는 매번 달라져요.</p>
+      <span class="count-pill">전체 252개 단어</span>
     </div>
 
     <div class="section">
       <p class="section-label">📚 범위</p>
-      <div class="opt-grid three" id="catOpts">
-        <button class="opt active" data-cat="all">전체<small>75개</small></button>
+      <div class="opt-grid" id="catOpts">
+        <button class="opt active" data-cat="all">전체<small>252개</small></button>
         <button class="opt" data-cat="동물">동물<small>38개</small></button>
         <button class="opt" data-cat="채소·과일">채소·과일<small>37개</small></button>
+        <button class="opt" data-cat="기타">기타 (교과서)<small>177개</small></button>
+      </div>
+    </div>
+
+    <div class="section hidden" id="subSection">
+      <p class="section-label">🗂 기타 세부 범위</p>
+      <div class="opt-grid three" id="subOpts">
+        <button class="opt active" data-sub="all">전체<small>177개</small></button>
+        <button class="opt" data-sub="인사">인사·표현<small>20개</small></button>
+        <button class="opt" data-sub="나라">나라·소개<small>29개</small></button>
+        <button class="opt" data-sub="가족">가족·학교<small>41개</small></button>
+        <button class="opt" data-sub="시간">날짜·시간<small>34개</small></button>
+        <button class="opt" data-sub="취미">취미·생활<small>53개</small></button>
       </div>
     </div>
 
@@ -217,7 +232,8 @@
         <button class="opt active" data-mode="h2k">한자 보고<small>뜻 맞히기</small></button>
         <button class="opt" data-mode="k2h">뜻 보고<small>한자 맞히기</small></button>
         <button class="opt" data-mode="p2k">병음 보고<small>뜻 맞히기</small></button>
-        <button class="opt" data-mode="mix">섞어서<small>랜덤 출제</small></button>
+        <button class="opt" data-mode="h2p">한자 보고<small>병음 맞히기</small></button>
+        <button class="opt wide" data-mode="mix">섞어서<small>네 방식 랜덤 출제</small></button>
       </div>
     </div>
 
@@ -275,6 +291,7 @@
 
     <div class="btn-row">
       <button class="again" id="againBtn">설정 바꾸기</button>
+      <button class="wrongonly hidden" id="wrongBtn">틀린 것만 🔥</button>
       <button class="retry" id="retryBtn">다시 풀기 🔁</button>
     </div>
   </div>
@@ -358,11 +375,198 @@ const WORDS = [
   {num:72,hanzi:"胡萝卜",pinyin:"húluóbo",korean:"당근",cat:"채소·과일"},
   {num:73,hanzi:"苹果",pinyin:"píngguǒ",korean:"사과",cat:"채소·과일"},
   {num:74,hanzi:"桃子",pinyin:"táozi",korean:"복숭아",cat:"채소·과일"},
-  {num:75,hanzi:"梨",pinyin:"lí",korean:"배",cat:"채소·과일"}
+  {num:75,hanzi:"梨",pinyin:"lí",korean:"배",cat:"채소·과일"},
+
+  /* ===== 기타 · 인사·표현 (제1과) ===== */
+  {num:76,hanzi:"你",pinyin:"nǐ",korean:"너",cat:"기타",sub:"인사"},
+  {num:77,hanzi:"好",pinyin:"hǎo",korean:"안녕하다, 좋다",cat:"기타",sub:"인사"},
+  {num:78,hanzi:"们",pinyin:"men",korean:"~들[복수를 나타냄]",cat:"기타",sub:"인사"},
+  {num:79,hanzi:"再见",pinyin:"zàijiàn",korean:"잘 가, 또 보자",cat:"기타",sub:"인사"},
+  {num:80,hanzi:"明天",pinyin:"míngtiān",korean:"내일",cat:"기타",sub:"인사"},
+  {num:81,hanzi:"见",pinyin:"jiàn",korean:"만나다",cat:"기타",sub:"인사"},
+  {num:82,hanzi:"大家",pinyin:"dàjiā",korean:"여러분, 모두",cat:"기타",sub:"인사"},
+  {num:83,hanzi:"吗",pinyin:"ma",korean:"~입니까?[의문을 나타냄]",cat:"기타",sub:"인사"},
+  {num:84,hanzi:"老师",pinyin:"lǎoshī",korean:"선생님",cat:"기타",sub:"인사"},
+  {num:85,hanzi:"早上",pinyin:"zǎoshang",korean:"아침",cat:"기타",sub:"인사"},
+  {num:86,hanzi:"晚上",pinyin:"wǎnshang",korean:"저녁, 밤",cat:"기타",sub:"인사"},
+  {num:87,hanzi:"谢谢",pinyin:"xièxie",korean:"고맙다",cat:"기타",sub:"인사"},
+  {num:88,hanzi:"不",pinyin:"bù",korean:"~하지 않다, 아니다",cat:"기타",sub:"인사"},
+  {num:89,hanzi:"客气",pinyin:"kèqi",korean:"예의를 차리다",cat:"기타",sub:"인사"},
+  {num:90,hanzi:"对不起",pinyin:"duìbuqǐ",korean:"미안하다",cat:"기타",sub:"인사"},
+  {num:91,hanzi:"没关系",pinyin:"méi guānxi",korean:"관계없다",cat:"기타",sub:"인사"},
+  {num:92,hanzi:"不好意思",pinyin:"bù hǎoyìsi",korean:"미안하다, 부끄럽다",cat:"기타",sub:"인사"},
+  {num:93,hanzi:"没事儿",pinyin:"méishìr",korean:"괜찮다",cat:"기타",sub:"인사"},
+  {num:94,hanzi:"您",pinyin:"nín",korean:"당신(你의 존칭)",cat:"기타",sub:"인사"},
+  {num:95,hanzi:"同学",pinyin:"tóngxué",korean:"학우, 동창",cat:"기타",sub:"인사"},
+
+  /* ===== 기타 · 나라·소개 (제2과) ===== */
+  {num:96,hanzi:"是",pinyin:"shì",korean:"~이다, 그렇다",cat:"기타",sub:"나라"},
+  {num:97,hanzi:"也",pinyin:"yě",korean:"~도, 또한",cat:"기타",sub:"나라"},
+  {num:98,hanzi:"哪",pinyin:"nǎ",korean:"어느",cat:"기타",sub:"나라"},
+  {num:99,hanzi:"中国",pinyin:"Zhōngguó",korean:"중국",cat:"기타",sub:"나라"},
+  {num:100,hanzi:"国",pinyin:"guó",korean:"나라",cat:"기타",sub:"나라"},
+  {num:101,hanzi:"人",pinyin:"rén",korean:"사람",cat:"기타",sub:"나라"},
+  {num:102,hanzi:"韩国",pinyin:"Hánguó",korean:"한국",cat:"기타",sub:"나라"},
+  {num:103,hanzi:"美国",pinyin:"Měiguó",korean:"미국",cat:"기타",sub:"나라"},
+  {num:104,hanzi:"学生",pinyin:"xuésheng",korean:"학생",cat:"기타",sub:"나라"},
+  {num:105,hanzi:"意大利",pinyin:"Yìdàlì",korean:"이탈리아",cat:"기타",sub:"나라"},
+  {num:106,hanzi:"墨西哥",pinyin:"Mòxīgē",korean:"멕시코",cat:"기타",sub:"나라"},
+  {num:107,hanzi:"加拿大",pinyin:"Jiānádà",korean:"캐나다",cat:"기타",sub:"나라"},
+  {num:108,hanzi:"日本",pinyin:"Rìběn",korean:"일본",cat:"기타",sub:"나라"},
+  {num:109,hanzi:"英国",pinyin:"Yīngguó",korean:"영국",cat:"기타",sub:"나라"},
+  {num:110,hanzi:"西班牙",pinyin:"Xībānyá",korean:"스페인",cat:"기타",sub:"나라"},
+  {num:111,hanzi:"叫",pinyin:"jiào",korean:"(~라고) 부르다",cat:"기타",sub:"나라"},
+  {num:112,hanzi:"认识",pinyin:"rènshi",korean:"알다",cat:"기타",sub:"나라"},
+  {num:113,hanzi:"什么",pinyin:"shénme",korean:"무엇, 무슨",cat:"기타",sub:"나라"},
+  {num:114,hanzi:"很",pinyin:"hěn",korean:"아주, 매우",cat:"기타",sub:"나라"},
+  {num:115,hanzi:"名字",pinyin:"míngzi",korean:"이름",cat:"기타",sub:"나라"},
+  {num:116,hanzi:"高兴",pinyin:"gāoxìng",korean:"기쁘다",cat:"기타",sub:"나라"},
+  {num:117,hanzi:"呢",pinyin:"ne",korean:"~는요?[의문을 나타냄]",cat:"기타",sub:"나라"},
+  {num:118,hanzi:"这",pinyin:"zhè",korean:"이, 이것",cat:"기타",sub:"나라"},
+  {num:119,hanzi:"饿",pinyin:"è",korean:"배고프다",cat:"기타",sub:"나라"},
+  {num:120,hanzi:"累",pinyin:"lèi",korean:"피곤하다",cat:"기타",sub:"나라"},
+  {num:121,hanzi:"幸福",pinyin:"xìngfú",korean:"행복하다",cat:"기타",sub:"나라"},
+  {num:122,hanzi:"紧张",pinyin:"jǐnzhāng",korean:"긴장하다",cat:"기타",sub:"나라"},
+  {num:123,hanzi:"厉害",pinyin:"lìhai",korean:"대단하다",cat:"기타",sub:"나라"},
+  {num:124,hanzi:"忙",pinyin:"máng",korean:"바쁘다",cat:"기타",sub:"나라"},
+
+  /* ===== 기타 · 가족·학교 (제3과) ===== */
+  {num:125,hanzi:"谁",pinyin:"shéi",korean:"누구",cat:"기타",sub:"가족"},
+  {num:126,hanzi:"岁",pinyin:"suì",korean:"살, 세",cat:"기타",sub:"가족"},
+  {num:127,hanzi:"姐姐",pinyin:"jiějie",korean:"누나, 언니",cat:"기타",sub:"가족"},
+  {num:128,hanzi:"今年",pinyin:"jīnnián",korean:"올해",cat:"기타",sub:"가족"},
+  {num:129,hanzi:"多",pinyin:"duō",korean:"얼마나",cat:"기타",sub:"가족"},
+  {num:130,hanzi:"大",pinyin:"dà",korean:"(나이가) 많다, 크다",cat:"기타",sub:"가족"},
+  {num:131,hanzi:"哥哥",pinyin:"gēge",korean:"형, 오빠",cat:"기타",sub:"가족"},
+  {num:132,hanzi:"弟弟",pinyin:"dìdi",korean:"남동생",cat:"기타",sub:"가족"},
+  {num:133,hanzi:"妹妹",pinyin:"mèimei",korean:"여동생",cat:"기타",sub:"가족"},
+  {num:134,hanzi:"爸爸",pinyin:"bàba",korean:"아빠",cat:"기타",sub:"가족"},
+  {num:135,hanzi:"妈妈",pinyin:"māma",korean:"엄마",cat:"기타",sub:"가족"},
+  {num:136,hanzi:"爷爷",pinyin:"yéye",korean:"할아버지",cat:"기타",sub:"가족"},
+  {num:137,hanzi:"奶奶",pinyin:"nǎinai",korean:"할머니",cat:"기타",sub:"가족"},
+  {num:138,hanzi:"书包",pinyin:"shūbāo",korean:"책가방",cat:"기타",sub:"가족"},
+  {num:139,hanzi:"几",pinyin:"jǐ",korean:"몇",cat:"기타",sub:"가족"},
+  {num:140,hanzi:"那",pinyin:"nà",korean:"저, 저것; 그러면",cat:"기타",sub:"가족"},
+  {num:141,hanzi:"年纪",pinyin:"niánjì",korean:"나이, 연세",cat:"기타",sub:"가족"},
+  {num:142,hanzi:"电脑",pinyin:"diànnǎo",korean:"컴퓨터",cat:"기타",sub:"가족"},
+  {num:143,hanzi:"小学",pinyin:"xiǎoxué",korean:"초등학교",cat:"기타",sub:"가족"},
+  {num:144,hanzi:"初中",pinyin:"chūzhōng",korean:"중학교",cat:"기타",sub:"가족"},
+  {num:145,hanzi:"高中",pinyin:"gāozhōng",korean:"고등학교",cat:"기타",sub:"가족"},
+  {num:146,hanzi:"中学",pinyin:"zhōngxué",korean:"중·고등학교",cat:"기타",sub:"가족"},
+  {num:147,hanzi:"大学",pinyin:"dàxué",korean:"대학교",cat:"기타",sub:"가족"},
+  {num:148,hanzi:"有",pinyin:"yǒu",korean:"있다",cat:"기타",sub:"가족"},
+  {num:149,hanzi:"年级",pinyin:"niánjí",korean:"학년",cat:"기타",sub:"가족"},
+  {num:150,hanzi:"可爱",pinyin:"kě'ài",korean:"귀엽다",cat:"기타",sub:"가족"},
+  {num:151,hanzi:"个",pinyin:"gè",korean:"명, 개[단위]",cat:"기타",sub:"가족"},
+  {num:152,hanzi:"喜欢",pinyin:"xǐhuan",korean:"좋아하다",cat:"기타",sub:"가족"},
+  {num:153,hanzi:"上",pinyin:"shàng",korean:"~에 다니다; 지난",cat:"기타",sub:"가족"},
+  {num:154,hanzi:"的",pinyin:"de",korean:"~의",cat:"기타",sub:"가족"},
+  {num:155,hanzi:"真",pinyin:"zhēn",korean:"정말",cat:"기타",sub:"가족"},
+  {num:156,hanzi:"帽子",pinyin:"màozi",korean:"모자",cat:"기타",sub:"가족"},
+  {num:157,hanzi:"没有",pinyin:"méiyǒu",korean:"없다",cat:"기타",sub:"가족"},
+  {num:158,hanzi:"雨伞",pinyin:"yǔsǎn",korean:"우산",cat:"기타",sub:"가족"},
+  {num:159,hanzi:"朋友",pinyin:"péngyou",korean:"친구",cat:"기타",sub:"가족"},
+  {num:160,hanzi:"自行车",pinyin:"zìxíngchē",korean:"자전거",cat:"기타",sub:"가족"},
+  {num:161,hanzi:"家",pinyin:"jiā",korean:"집",cat:"기타",sub:"가족"},
+  {num:162,hanzi:"热情",pinyin:"rèqíng",korean:"친절하다",cat:"기타",sub:"가족"},
+  {num:163,hanzi:"房间",pinyin:"fángjiān",korean:"방",cat:"기타",sub:"가족"},
+  {num:164,hanzi:"聪明",pinyin:"cōngming",korean:"똑똑하다, 영리하다",cat:"기타",sub:"가족"},
+  {num:165,hanzi:"漂亮",pinyin:"piàoliang",korean:"예쁘다",cat:"기타",sub:"가족"},
+
+  /* ===== 기타 · 날짜·시간 (제4과) ===== */
+  {num:166,hanzi:"今天",pinyin:"jīntiān",korean:"오늘",cat:"기타",sub:"시간"},
+  {num:167,hanzi:"考",pinyin:"kǎo",korean:"시험을 보다",cat:"기타",sub:"시간"},
+  {num:168,hanzi:"加油",pinyin:"jiāyóu",korean:"힘을 내다",cat:"기타",sub:"시간"},
+  {num:169,hanzi:"月",pinyin:"yuè",korean:"월",cat:"기타",sub:"시간"},
+  {num:170,hanzi:"汉语",pinyin:"Hànyǔ",korean:"중국어",cat:"기타",sub:"시간"},
+  {num:171,hanzi:"号",pinyin:"hào",korean:"일[날짜]",cat:"기타",sub:"시간"},
+  {num:172,hanzi:"下",pinyin:"xià",korean:"(시간이나 순서에서) 다음",cat:"기타",sub:"시간"},
+  {num:173,hanzi:"星期",pinyin:"xīngqī",korean:"요일, 주",cat:"기타",sub:"시간"},
+  {num:174,hanzi:"星期五",pinyin:"xīngqīwǔ",korean:"금요일",cat:"기타",sub:"시간"},
+  {num:175,hanzi:"星期日",pinyin:"xīngqīrì",korean:"일요일",cat:"기타",sub:"시간"},
+  {num:176,hanzi:"儿童节",pinyin:"Értóngjié",korean:"어린이날",cat:"기타",sub:"시간"},
+  {num:177,hanzi:"演唱会",pinyin:"yǎnchànghuì",korean:"콘서트",cat:"기타",sub:"시간"},
+  {num:178,hanzi:"长寿面",pinyin:"chángshòumiàn",korean:"장수면",cat:"기타",sub:"시간"},
+  {num:179,hanzi:"生日",pinyin:"shēngrì",korean:"생일",cat:"기타",sub:"시간"},
+  {num:180,hanzi:"电影",pinyin:"diànyǐng",korean:"영화",cat:"기타",sub:"시간"},
+  {num:181,hanzi:"两",pinyin:"liǎng",korean:"둘, 2",cat:"기타",sub:"시간"},
+  {num:182,hanzi:"点",pinyin:"diǎn",korean:"시[시각]",cat:"기타",sub:"시간"},
+  {num:183,hanzi:"半",pinyin:"bàn",korean:"반(30분)",cat:"기타",sub:"시간"},
+  {num:184,hanzi:"开始",pinyin:"kāishǐ",korean:"시작하다",cat:"기타",sub:"시간"},
+  {num:185,hanzi:"吧",pinyin:"ba",korean:"~하자[제안을 나타냄]",cat:"기타",sub:"시간"},
+  {num:186,hanzi:"分",pinyin:"fēn",korean:"분",cat:"기타",sub:"시간"},
+  {num:187,hanzi:"听",pinyin:"tīng",korean:"듣다",cat:"기타",sub:"시간"},
+  {num:188,hanzi:"起床",pinyin:"qǐchuáng",korean:"일어나다",cat:"기타",sub:"시간"},
+  {num:189,hanzi:"出发",pinyin:"chūfā",korean:"출발하다",cat:"기타",sub:"시간"},
+  {num:190,hanzi:"刻",pinyin:"kè",korean:"15분[단위]",cat:"기타",sub:"시간"},
+  {num:191,hanzi:"一起",pinyin:"yìqǐ",korean:"함께",cat:"기타",sub:"시간"},
+  {num:192,hanzi:"吃",pinyin:"chī",korean:"먹다",cat:"기타",sub:"시간"},
+  {num:193,hanzi:"饭",pinyin:"fàn",korean:"밥",cat:"기타",sub:"시간"},
+  {num:194,hanzi:"劳动节",pinyin:"Láodòngjié",korean:"노동절",cat:"기타",sub:"시간"},
+  {num:195,hanzi:"上学",pinyin:"shàngxué",korean:"등교하다",cat:"기타",sub:"시간"},
+  {num:196,hanzi:"教师节",pinyin:"Jiàoshījié",korean:"스승의 날",cat:"기타",sub:"시간"},
+  {num:197,hanzi:"晚饭",pinyin:"wǎnfàn",korean:"저녁밥",cat:"기타",sub:"시간"},
+  {num:198,hanzi:"圣诞节",pinyin:"Shèngdànjié",korean:"성탄절",cat:"기타",sub:"시간"},
+  {num:199,hanzi:"睡觉",pinyin:"shuìjiào",korean:"(잠을) 자다",cat:"기타",sub:"시간"},
+
+  /* ===== 기타 · 취미·생활 (제5과) ===== */
+  {num:200,hanzi:"做",pinyin:"zuò",korean:"하다",cat:"기타",sub:"취미"},
+  {num:201,hanzi:"跑步",pinyin:"pǎobù",korean:"달리다",cat:"기타",sub:"취미"},
+  {num:202,hanzi:"都",pinyin:"dōu",korean:"모두",cat:"기타",sub:"취미"},
+  {num:203,hanzi:"捡",pinyin:"jiǎn",korean:"줍다",cat:"기타",sub:"취미"},
+  {num:204,hanzi:"要",pinyin:"yào",korean:"~해야 한다",cat:"기타",sub:"취미"},
+  {num:205,hanzi:"垃圾",pinyin:"lājī",korean:"쓰레기",cat:"기타",sub:"취미"},
+  {num:206,hanzi:"保护",pinyin:"bǎohù",korean:"보호하다",cat:"기타",sub:"취미"},
+  {num:207,hanzi:"一边~一边…",pinyin:"yìbiān~ yìbiān…",korean:"~하면서 …하다",cat:"기타",sub:"취미"},
+  {num:208,hanzi:"哇",pinyin:"wā",korean:"와[감탄을 나타냄]",cat:"기타",sub:"취미"},
+  {num:209,hanzi:"环境",pinyin:"huánjìng",korean:"환경",cat:"기타",sub:"취미"},
+  {num:210,hanzi:"棒",pinyin:"bàng",korean:"훌륭하다",cat:"기타",sub:"취미"},
+  {num:211,hanzi:"嘛",pinyin:"ma",korean:"~잖아![당연함을 나타냄]",cat:"기타",sub:"취미"},
+  {num:212,hanzi:"唱歌",pinyin:"chànggē",korean:"노래 부르다",cat:"기타",sub:"취미"},
+  {num:213,hanzi:"口罩",pinyin:"kǒuzhào",korean:"마스크",cat:"기타",sub:"취미"},
+  {num:214,hanzi:"灯",pinyin:"dēng",korean:"등, 램프",cat:"기타",sub:"취미"},
+  {num:215,hanzi:"跳舞",pinyin:"tiàowǔ",korean:"춤을 추다",cat:"기타",sub:"취미"},
+  {num:216,hanzi:"节约",pinyin:"jiéyuē",korean:"절약하다",cat:"기타",sub:"취미"},
+  {num:217,hanzi:"分类",pinyin:"fēnlèi",korean:"분류(하다)",cat:"기타",sub:"취미"},
+  {num:218,hanzi:"捡跑",pinyin:"jiǎnpǎo",korean:"플로깅",cat:"기타",sub:"취미"},
+  {num:219,hanzi:"水",pinyin:"shuǐ",korean:"물",cat:"기타",sub:"취미"},
+  {num:220,hanzi:"电",pinyin:"diàn",korean:"전기",cat:"기타",sub:"취미"},
+  {num:221,hanzi:"使用",pinyin:"shǐyòng",korean:"사용하다",cat:"기타",sub:"취미"},
+  {num:222,hanzi:"戴",pinyin:"dài",korean:"(머리·얼굴 따위에) 착용하다, 쓰다",cat:"기타",sub:"취미"},
+  {num:223,hanzi:"关",pinyin:"guān",korean:"끄다, 닫다",cat:"기타",sub:"취미"},
+  {num:224,hanzi:"保温杯",pinyin:"bǎowēnbēi",korean:"텀블러",cat:"기타",sub:"취미"},
+  {num:225,hanzi:"爱好",pinyin:"àihào",korean:"취미",cat:"기타",sub:"취미"},
+  {num:226,hanzi:"会",pinyin:"huì",korean:"(배워서) 할 줄 알다",cat:"기타",sub:"취미"},
+  {num:227,hanzi:"学",pinyin:"xué",korean:"배우다",cat:"기타",sub:"취미"},
+  {num:228,hanzi:"运动",pinyin:"yùndòng",korean:"운동",cat:"기타",sub:"취미"},
+  {num:229,hanzi:"打",pinyin:"dǎ",korean:"(손이나 기구로) 치다, 하다",cat:"기타",sub:"취미"},
+  {num:230,hanzi:"以后",pinyin:"yǐhòu",korean:"이후",cat:"기타",sub:"취미"},
+  {num:231,hanzi:"踢",pinyin:"tī",korean:"(발로) 차다",cat:"기타",sub:"취미"},
+  {num:232,hanzi:"乒乓球",pinyin:"pīngpāngqiú",korean:"탁구",cat:"기타",sub:"취미"},
+  {num:233,hanzi:"当",pinyin:"dāng",korean:"~이(가) 되다",cat:"기타",sub:"취미"},
+  {num:234,hanzi:"足球",pinyin:"zúqiú",korean:"축구",cat:"기타",sub:"취미"},
+  {num:235,hanzi:"想",pinyin:"xiǎng",korean:"~하고 싶다",cat:"기타",sub:"취미"},
+  {num:236,hanzi:"体育",pinyin:"tǐyù",korean:"체육",cat:"기타",sub:"취미"},
+  {num:237,hanzi:"游泳",pinyin:"yóuyǒng",korean:"수영(하다)",cat:"기타",sub:"취미"},
+  {num:238,hanzi:"钢琴",pinyin:"gāngqín",korean:"피아노",cat:"기타",sub:"취미"},
+  {num:239,hanzi:"说",pinyin:"shuō",korean:"말하다",cat:"기타",sub:"취미"},
+  {num:240,hanzi:"火锅",pinyin:"huǒguō",korean:"훠궈",cat:"기타",sub:"취미"},
+  {num:241,hanzi:"菜",pinyin:"cài",korean:"요리, 음식",cat:"기타",sub:"취미"},
+  {num:242,hanzi:"设计师",pinyin:"shèjìshī",korean:"디자이너",cat:"기타",sub:"취미"},
+  {num:243,hanzi:"弹",pinyin:"tán",korean:"(악기를) 연주하다",cat:"기타",sub:"취미"},
+  {num:244,hanzi:"写",pinyin:"xiě",korean:"쓰다",cat:"기타",sub:"취미"},
+  {num:245,hanzi:"音乐",pinyin:"yīnyuè",korean:"음악",cat:"기타",sub:"취미"},
+  {num:246,hanzi:"看",pinyin:"kàn",korean:"보다",cat:"기타",sub:"취미"},
+  {num:247,hanzi:"拍照",pinyin:"pāizhào",korean:"사진을 찍다",cat:"기타",sub:"취미"},
+  {num:248,hanzi:"电视",pinyin:"diànshì",korean:"텔레비전",cat:"기타",sub:"취미"},
+  {num:249,hanzi:"玩儿",pinyin:"wánr",korean:"(~하고) 놀다",cat:"기타",sub:"취미"},
+  {num:250,hanzi:"喝",pinyin:"hē",korean:"마시다",cat:"기타",sub:"취미"},
+  {num:251,hanzi:"游戏",pinyin:"yóuxì",korean:"게임",cat:"기타",sub:"취미"},
+  {num:252,hanzi:"茶",pinyin:"chá",korean:"차[음료]",cat:"기타",sub:"취미"}
 ];
 
 // ---------- 설정 상태 ----------
-const settings = { cat:"all", mode:"h2k", count:"20" };
+const settings = { cat:"all", sub:"all", mode:"h2k", count:"20" };
 
 // ---------- 화면 요소 ----------
 const startScreen = document.getElementById('startScreen');
@@ -371,16 +575,20 @@ const resultScreen= document.getElementById('resultScreen');
 const homeBtn     = document.getElementById('homeBtn');
 
 // ---------- 옵션 버튼 ----------
-function bindOpts(containerId, key){
+function bindOpts(containerId, key, onChange){
   document.querySelectorAll('#'+containerId+' .opt').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('#'+containerId+' .opt').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       settings[key] = btn.dataset[key];
+      if(onChange) onChange(settings[key]);
     });
   });
 }
-bindOpts('catOpts','cat');
+bindOpts('catOpts','cat', v=>{
+  document.getElementById('subSection').classList.toggle('hidden', v!=="기타");
+});
+bindOpts('subOpts','sub');
 bindOpts('modeOpts','mode');
 bindOpts('countOpts','count');
 
@@ -393,21 +601,30 @@ function shuffle(arr){
   }
   return a;
 }
+// 병음 성조 제거 (비슷한 발음 찾기용)
+function plainPy(p){
+  return p.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+}
+// 한국어 뜻을 토큰으로 분해 (뜻이 겹치는 보기 차단용)
+function koTokens(s){
+  return s.split(/[,;·()\[\]~\s]+/).filter(t=>t.length>1);
+}
 
 // ---------- 퀴즈 상태 ----------
 let quiz = { list:[], idx:0, score:0, wrong:[], answered:false };
 
-function startQuiz(){
-  // 범위 적용
-  let pool = settings.cat==="all" ? WORDS : WORDS.filter(w=>w.cat===settings.cat);
-  pool = shuffle(pool);
-  // 문제 수 적용
-  let n = settings.count==="all" ? pool.length : Math.min(parseInt(settings.count), pool.length);
-  quiz.list = pool.slice(0, n);
+function buildPool(){
+  let pool = WORDS;
+  if(settings.cat!=="all") pool = pool.filter(w=>w.cat===settings.cat);
+  if(settings.cat==="기타" && settings.sub!=="all") pool = pool.filter(w=>w.sub===settings.sub);
+  return pool;
+}
+
+function beginQuiz(list){
+  quiz.list = list;
   quiz.idx = 0;
   quiz.score = 0;
   quiz.wrong = [];
-
   startScreen.classList.add('hidden');
   resultScreen.classList.add('hidden');
   quizScreen.classList.remove('hidden');
@@ -415,13 +632,60 @@ function startQuiz(){
   renderQuestion();
 }
 
+function startQuiz(){
+  let pool = shuffle(buildPool());
+  let n = settings.count==="all" ? pool.length : Math.min(parseInt(settings.count), pool.length);
+  beginQuiz(pool.slice(0, n));
+}
+
+function startWrongQuiz(){
+  const seen = new Set();
+  const uniq = quiz.wrong.filter(w=>{ if(seen.has(w.num)) return false; seen.add(w.num); return true; });
+  if(uniq.length===0) return;
+  beginQuiz(shuffle(uniq));
+}
+
 // 문제 하나의 출제 방식 결정
 function pickMode(){
   if(settings.mode==="mix"){
-    const m = ["h2k","k2h","p2k"];
+    const m = ["h2k","k2h","p2k","h2p"];
     return m[Math.floor(Math.random()*m.length)];
   }
   return settings.mode;
+}
+
+// ---------- 더 어렵고 그럴듯한 오답 고르기 ----------
+// 1) 정답과 뜻·한자·병음이 겹치는 단어는 보기에서 제외 (정답이 2개가 되는 것 방지)
+// 2) 같은 범주/같은 단원, 한자가 겹치거나 발음이 비슷한 단어를 우선으로 뽑아 난이도 상승
+// 3) 점수에 랜덤을 섞고 상위 후보 중 무작위 3개 → 풀 때마다 보기가 달라짐
+function pickDistractors(w, answerField, mode){
+  const wTok = koTokens(w.korean);
+  const wPy = plainPy(w.pinyin);
+  let cands = WORDS.filter(x=>
+    x.num!==w.num &&
+    x.hanzi!==w.hanzi &&
+    x.korean!==w.korean &&
+    plainPy(x.pinyin)!==wPy &&
+    !koTokens(x.korean).some(t=>wTok.includes(t))
+  );
+  const score = x=>{
+    let s = Math.random()*1.5;                       // 보기 다양화
+    if(x.cat===w.cat) s+=2;
+    if(w.sub && x.sub===w.sub) s+=1.5;
+    if(answerField==="hanzi"){
+      if([...x.hanzi].some(ch=>w.hanzi.includes(ch))) s+=3;   // 같은 한자 포함 → 헷갈리는 보기
+      if(x.hanzi.length===w.hanzi.length) s+=1;
+    }
+    if(answerField==="pinyin" || mode==="p2k"){
+      const xPy = plainPy(x.pinyin);
+      if(xPy[0]===wPy[0]) s+=1.5;                    // 같은 첫소리
+      if(xPy.slice(0,2)===wPy.slice(0,2)) s+=1.5;    // 비슷한 발음
+      if(Math.abs(xPy.length-wPy.length)<=1) s+=1;
+    }
+    return s;
+  };
+  const sorted = cands.map(x=>({s:score(x),x})).sort((a,b)=>b.s-a.s).map(o=>o.x);
+  return shuffle(sorted.slice(0,8)).slice(0,3);
 }
 
 function renderQuestion(){
@@ -440,39 +704,32 @@ function renderQuestion(){
   const subEl    = document.getElementById('qSub');
   const ansBox   = document.getElementById('answers');
   ansBox.innerHTML = '';
+  subEl.textContent = '';
+  promptEl.classList.remove('small');
   document.getElementById('nextBtn').classList.add('hidden');
 
-  // 보기 후보 (같은 범주에서 우선 뽑기)
-  let answerField, distractorPool;
+  let answerField;
   if(mode==="k2h"){
-    // 뜻 보여주고 한자 고르기
     tagEl.textContent = "알맞은 한자를 고르세요";
     promptEl.textContent = w.korean;
     promptEl.classList.add('small');
-    subEl.textContent = "";
     answerField = "hanzi";
-  } else {
-    // h2k 또는 p2k : 뜻 고르기
+  } else if(mode==="h2p"){
+    tagEl.textContent = "알맞은 병음을 고르세요";
+    promptEl.textContent = w.hanzi;
+    answerField = "pinyin";
+  } else if(mode==="p2k"){
     tagEl.textContent = "알맞은 뜻을 고르세요";
-    promptEl.classList.remove('small');
-    if(mode==="h2k"){
-      promptEl.textContent = w.hanzi;
-      subEl.textContent = "";          // 한자만 (병음 힌트 없음)
-    } else { // p2k
-      promptEl.textContent = w.pinyin;
-      promptEl.classList.add('small');
-      subEl.textContent = "";
-    }
+    promptEl.textContent = w.pinyin;
+    promptEl.classList.add('small');
+    answerField = "korean";
+  } else { // h2k
+    tagEl.textContent = "알맞은 뜻을 고르세요";
+    promptEl.textContent = w.hanzi;
     answerField = "korean";
   }
 
-  // 정답 + 오답 3개 (같은 cat 우선, 부족하면 전체에서)
-  const sameCat = WORDS.filter(x=>x.cat===w.cat && x.num!==w.num && x[answerField]!==w[answerField]);
-  const others  = WORDS.filter(x=>x.cat!==w.cat && x[answerField]!==w[answerField]);
-  let distract = shuffle(sameCat).slice(0,3);
-  if(distract.length<3){
-    distract = distract.concat(shuffle(others).slice(0, 3-distract.length));
-  }
+  const distract = pickDistractors(w, answerField, mode);
   let choices = shuffle([w, ...distract]);
 
   const idxLabels = ['A','B','C','D'];
@@ -491,7 +748,7 @@ function handleAnswer(btn, choice, w, field){
   if(quiz.answered) return;
   quiz.answered = true;
 
-  const correct = choice[field] === w[field];
+  const correct = choice.num === w.num;
   const allBtns = document.querySelectorAll('#answers .ans');
 
   allBtns.forEach(b=>{
@@ -502,6 +759,9 @@ function handleAnswer(btn, choice, w, field){
       b.querySelector('.mark').textContent = '✓';
     }
   });
+
+  // 정답 확인 후 한자·병음·뜻 전부 보여주기 (복습 효과)
+  document.getElementById('qSub').textContent = w.hanzi+'  ·  '+w.pinyin+'  ·  '+w.korean;
 
   if(correct){
     quiz.score++;
@@ -556,6 +816,7 @@ function showResult(){
   const box = document.getElementById('reviewBox');
   const list = document.getElementById('reviewList');
   list.innerHTML = '';
+  document.getElementById('wrongBtn').classList.toggle('hidden', quiz.wrong.length===0);
   if(quiz.wrong.length===0){
     box.classList.add('hidden');
   } else {
@@ -578,6 +839,7 @@ function showResult(){
 // ---------- 버튼 연결 ----------
 document.getElementById('startBtn').addEventListener('click', startQuiz);
 document.getElementById('retryBtn').addEventListener('click', startQuiz);
+document.getElementById('wrongBtn').addEventListener('click', startWrongQuiz);
 document.getElementById('againBtn').addEventListener('click', goHome);
 homeBtn.addEventListener('click', goHome);
 
